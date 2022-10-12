@@ -18,8 +18,8 @@ Their key realization was that the learned filters of the style transfer
 network could be shared between different styles, and it is sufficient to
 learn a different set of normalization parameters for each style.  To allow
 for this, they proposed to replace each batch or instance normalization layer
-by their new conditional instance normalization layer which learns `N` sets of
-instance normalization parameters and takes an `N`-dimensional style vector as
+by their new conditional instance normalization layer which learns $N$ sets of
+instance normalization parameters and takes an $N$-dimensional style vector as
 a second input to select which (linear combination of) parameters to use.  For
 more details, see the 'Network Architecture' section below.
 
@@ -58,7 +58,7 @@ reflection padding layer, a convolutional layer, a normalization layer, and a
 by the same formulas as it is for `same` padding, but the type of padding
 applied is reflection padding instead of constant.  The second and third block
 uses strided convolutions to reduce the spatial dimensions by a total factor
-of `4`.
+of 4.
 
 ```text
 Block / Layer           Description                        Output Size
@@ -80,10 +80,10 @@ down_block_3 / rpad     ReflectionPadding
 ```
 
 ### The Bottleneck
-The bottleneck comprises five residual blocks, each of which consists of five
-layers and a residual connection.  In order, the layers are: convolution,
-normalization, and `relu` activation, followed by another convolution and
-another normalization layer.
+The bottleneck comprises five residual blocks, each of which consists of seven
+layers and a residual connection.  In order, the layers are: padding,
+convolution, normalization, and `relu` activation, followed by another
+padding, convolution, and normalization layer.
 
 ```text
 Block / Layer           Description                        Output Size
@@ -167,7 +167,41 @@ Results
 This repository contains a python script [`train.py`](train.py) which takes a
 collection of style images as well as some training parameters as input,
 downloads the training dataset, performs training of the style transfer model,
-and finally saves the trained model to disk.
+and finally saves the trained model to disk.  The directory `saved/model`
+contains a model trained in this way for the 32 images in `img/style`.  To try
+the model out yourself, have a look at the notebook
+[`multi-style-transfer.ipynb`](multi-style-transfer.ipynb).
+All images below were produced using it.
+
+> **Note**
+> The images included here are lower quality jpeg files.  I have linked them
+> to their lossless png versions.
+
+The following are two sets of stylizations of the same content images in the
+same styles as used to demonstrate Johnson et al's style transfer network.
+Note that all of these pastiches were produced using a single style transfer
+network.  The quality of the results here is comparable to that of pastiches
+produced by Johnson's networks trained for individual styles—see my repository
+[`johnson-fast-style-transfer`](
+https://github.com/mdehling/johnson-fast-style-transfer).
+
+[![](img/results/content-style-matrix-1.jpg)
+](img/results/content-style-matrix-1.png)
+
+Note that the use of upsampling layers instead of transposed or fractionally
+strided convolutions can lead to improved results by eliminating checkerboard
+artifacts.  This is particularly clear when comparing the first of the
+following stylizations to the the corresponding one created using Johnson's
+network.
+
+[![](img/results/content-style-matrix-2.jpg)
+](img/results/content-style-matrix-2.png)
+
+The following demonstrates the ability of Dumoulin et al's network to produce
+pastiches in mixed styles.
+
+[![](img/results/style-mix-matrix.jpg)
+](img/results/style-mix-matrix.png)
 
 References
 ----------
