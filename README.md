@@ -75,7 +75,7 @@ down_block_2 / rpad     ReflectionPadding
 
 down_block_3 / rpad     ReflectionPadding
              / conv     Convolution (128, 3x3, stride 2)
-             / norm     Batch/InstanceNormalization
+             / norm     ConditionalInstanceNormalization
              / act      Activation (ReLU)                  64x64x128
 ```
 
@@ -109,22 +109,22 @@ the final layer end with a 'sigmoid' activation.
 ```text
 Block / Layer           Description                        Output Size
 ----------------------------------------------------------------------
-up_block_1 / up       UpSampling (2x, nearest)
-           / rpad     ReflectionPadding
-           / conv     Convolution (64, 3x3, stride 1)
-           / norm     ConditionalInstanceNormalization
-           / act      Activation (ReLU)                  128x128x64
+up_block_1 / up         UpSampling (2x, nearest)
+           / rpad       ReflectionPadding
+           / conv       Convolution (64, 3x3, stride 1)
+           / norm       ConditionalInstanceNormalization
+           / act        Activation (ReLU)                  128x128x64
 
-up_block_2 / up       UpSampling (2x, nearest)
-           / rpad     ReflectionPadding
-           / conv     Convolution (32, 3x3, stride 1)
-           / norm     ConditionalInstanceNormalization
-           / act      Activation (ReLU)                  256x256x32
+up_block_2 / up         UpSampling (2x, nearest)
+           / rpad       ReflectionPadding
+           / conv       Convolution (32, 3x3, stride 1)
+           / norm       ConditionalInstanceNormalization
+           / act        Activation (ReLU)                  256x256x32
 
-up_block_3 / rpad     ReflectionPadding
-           / conv     Convolution (3, 9x9, stride 1)
-           / norm     ConditionalInstanceNormalization
-           / act      Activation (Sigmoid)               256x256x3
+up_block_3 / rpad       ReflectionPadding
+           / conv       Convolution (3, 9x9, stride 1)
+           / norm       ConditionalInstanceNormalization
+           / act        Activation (Sigmoid)               256x256x3
 ```
 
 ### Post-Processing
@@ -140,15 +140,15 @@ rescale                 Rescaling (factor 255.0)           256x256x3
 
 Training Method
 ---------------
-Let $x_s$ be a chosen style image and denote by $T_s$ the _image 
-transformation network_.  The goal is to produce, for any content image
-$x_c$, a pastiche image $x_p = T_s(x_c)$ using a single forward pass of the
-network.  The objective formulated to achieve this goal is to minimize a
-weighted sum
+Let $S = \\{x_s^i\\}$ be a collection of $N$ style images, and denote by $T_S$
+the _image transformation network_.  The goal is to produce, for any content
+image $x_c$ and any style vector $v = (v^1,...,v^N)$, a pastiche image
+$x_p = T_S(x_c, v)$ using a single forward pass of the network.  The objective
+formulated to achieve this goal is to minimize a weighted sum
 
 $$
-\mathcal{L}(x_c,x_s,x_p) =
-w_C\cdot\mathcal{L}_C(x_c,x_p) + w_S\cdot\mathcal{L}_S(x_s,x_p) \quad,
+\mathcal{L}(x_c,x_s,x_p) = w_C\cdot\mathcal{L}_C(x_c,x_p)
+\+ w_S \cdot \sum_i^N v^i\cdot\mathcal{L}_S(x_s^i,x_p) \quad,
 $$
 
 where $\mathcal{L}_C$ and $\mathcal{L}_S$ denote the content and style loss as
